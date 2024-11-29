@@ -7,7 +7,6 @@ import 'package:vessel_vault/utilities/constants/font_size.dart';
 import 'package:vessel_vault/utilities/constants/icons.dart';
 import 'package:vessel_vault/utilities/functions/fireauth_services.dart';
 import '../../features/pages/checker/subpages/func/create_document.dart';
-import '../../features/pages/checker/subpages/func/create_expense.dart';
 import '../constants/images.dart';
 
 Widget myText({
@@ -20,6 +19,7 @@ Widget myText({
   bool enabled = true,
   VoidCallback? onTap,
   Widget? suffix,
+  String? prefix,
   TextInputAction action = TextInputAction.done,
 }) {
   final isWeb = MediaQuery.of(context).size.width > 600;
@@ -57,6 +57,7 @@ Widget myText({
                     ? Colors.black54
                     : Colors.white30,
               ),
+          prefixText: prefix != null ? '₱ ' : null,
           suffixIcon: suffix != null
               ? IconButton(
                   onPressed: enabled ? onTap : null,
@@ -204,7 +205,11 @@ AppBar myAppBar({
 }
 
 Widget mySearchBar(
-    BuildContext context, TextEditingController controller, String hint) {
+  BuildContext context,
+  TextEditingController controller,
+  String hint, {
+  Function(String)? onChanged,
+}) {
   return Container(
     margin: const EdgeInsets.only(bottom: 12),
     child: TextField(
@@ -225,11 +230,12 @@ Widget mySearchBar(
         ),
       ),
       controller: controller,
+      onChanged: onChanged,
     ),
   );
 }
 
-Widget myTripleNav(BuildContext context) {
+Widget myDoubleNav(BuildContext context) {
   return SizedBox(
     width: double.infinity,
     child: Container(
@@ -241,9 +247,6 @@ Widget myTripleNav(BuildContext context) {
           myNavigationButton(context, () {
             Get.to(() => const CreateDocument());
           }, 'New Document', VIcons.documentIcon),
-          myNavigationButton(context, () {
-            Get.to(() => const CreateExpense());
-          }, 'New Expense', VIcons.expenseIcon),
           myNavigationButton(context, () {
             Get.to(() => const Reports());
           }, 'Generate Report', VIcons.report),

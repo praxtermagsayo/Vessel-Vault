@@ -21,26 +21,24 @@ class Documents extends StatelessWidget {
       body: myBody(
         context: context,
         children: [
-          mySearchBar(context, searchController, 'Search documents...'),
-          mySection(
+          mySearchBar(
             context,
-            'Recent Documents',
-            [
-              dataController.buildDataList(
-                context, 
-                dataController.fetchAllDocuments(),
-                useSection: true,
-              ),
-            ],
+            searchController,
+            'Search documents...',
+            onChanged: (value) {
+              dataController.filterDocuments(value);
+            },
           ),
-          mySize(24, 0, null),
+          mySection(context, 'All Documents', [
+            dataController.buildFilteredList(
+              context,
+              dataController.fetchAllDocuments(),
+              useSection: false,
+            ),
+          ]),
         ],
-        child: myButton(
-          context, 
-          true, 
-          () => Get.to(() => const CreateDocument()), 
-          'New Document'
-        ),
+        child: myButton(context, true,
+            () => Get.to(() => const CreateDocument()), 'New Document'),
       ),
     );
   }

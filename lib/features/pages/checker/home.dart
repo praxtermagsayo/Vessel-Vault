@@ -19,38 +19,29 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: myAppBar(context: context, title: 'Dashboard', action: true),
       body: myBody(
-        context: context, 
+        context: context,
         children: [
           mySearchBar(
-            context, 
+            context,
             searchController,
-            'Search documents, expenses, reports...'
+            'Search documents by area...',
+            onChanged: (value) {
+              dataController.filterDocuments(value);
+            },
           ),
-          myTripleNav(context),
+          myDoubleNav(context),
           mySection(
-            context, 
-            'Recent Documents', 
+            context,
+            'Recent Documents',
             [
-              dataController.buildDataList(
+              dataController.buildFilteredList(
                 context,
                 dataController.fetchRecentDocuments(),
                 useSection: false,
               ),
-            ]
+            ],
           ),
-          mySection(
-            context, 
-            'Recent Expenses', 
-            [
-              dataController.buildDataList(
-                context,
-                dataController.fetchRecentExpenses(),
-                useSection: false,
-              ),
-            ]
-          ),
-          mySize(10, 0, null)
-        ]
+        ],
       ),
     );
   }

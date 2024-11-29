@@ -6,19 +6,25 @@ import 'document_details.dart';
 
 class DocumentCard extends StatelessWidget {
   final QueryDocumentSnapshot document;
-  
+  final VoidCallback? onTap;
+
   const DocumentCard({
     super.key,
     required this.document,
+    this.onTap,
   });
 
   void _navigateToDetails(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DocumentDetails(document: document),
-      ),
-    );
+    if (onTap != null) {
+      onTap!();
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DocumentDetails(document: document),
+        ),
+      );
+    }
   }
 
   @override

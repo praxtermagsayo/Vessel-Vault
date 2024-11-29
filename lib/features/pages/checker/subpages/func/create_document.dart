@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:vessel_vault/features/models/document_model.dart';
+import 'package:vessel_vault/features/models/expense_model.dart';
 import 'package:vessel_vault/controller/data_controllers/store_data_controller.dart';
 import 'package:vessel_vault/utilities/constants/colors.dart';
 import 'package:vessel_vault/utilities/functions/reusable.dart';
@@ -48,7 +50,8 @@ class _CreateDocumentState extends State<CreateDocument> {
     ]);
   }
 
-  Widget _buildCustomerListItem(int customerKey, Map<String, dynamic> customer) {
+  Widget _buildCustomerListItem(
+      int customerKey, Map<String, dynamic> customer) {
     return ListTile(
       title: Row(
         children: [
@@ -124,25 +127,110 @@ class _CreateDocumentState extends State<CreateDocument> {
     );
   }
 
+  Widget _buildExpensesSection() {
+    return Obx(
+      () => mySection(
+        context,
+        'Expenses',
+        [
+          _buildExpenseHeader(),
+          _buildExpenseList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpenseHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Text('Category', style: Theme.of(context).textTheme.labelSmall),
+        Text('Amount', style: Theme.of(context).textTheme.labelSmall),
+      ],
+    );
+  }
+
+  Widget _buildExpenseList() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.light
+            ? VColors.accent
+            : VColors.darkAccent,
+        borderRadius: BorderRadius.circular(5),
+      ),
+      width: double.infinity,
+      child: Column(
+        children: [
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: controller.tempExpenses.length,
+            itemBuilder: (context, index) {
+              final expenseKey = controller.tempExpenses.keys.toList()[index];
+              final expense = controller.tempExpenses[expenseKey]!;
+              return _buildExpenseListItem(expenseKey, expense);
+            },
+          ),
+          myButton(
+            context,
+            false,
+            () => controller.addExpenseDialog(context),
+            'Add Expense',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpenseListItem(int expenseKey, Map<String, dynamic> expense) {
+    return ListTile(
+      title: Row(
+        children: [
+          Text(
+            expense['category'],
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+          const Spacer(),
+          Text(
+            '₱${expense['amount']}',
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+          IconButton(
+            onPressed: () => controller.deleteExpense(expenseKey),
+            icon: const Icon(Iconsax.trash, color: VColors.error),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleSubmit() async {
     try {
+
       controller.updateCustomersList();
+      controller.updateExpensesList();
+
       final document = DocumentModel(
         uid: controller.user.uid,
         area: controller.areaController.text,
         fishType: controller.fishTypeController.text,
         customers: controller.customersLists,
+        expenses: controller.expensesLists,
       );
+
       await controller.storeDocument(document);
       controller.clearInputs();
+
       VLoaders.successSnackBar(
         title: 'Success',
-        message: 'Document uploaded successfully!',
+        message: 'Document created successfully!',
       );
+
+      await Future.delayed(const Duration(milliseconds: 800));
+      Get.back();
     } catch (e) {
       VLoaders.errorSnackBar(
         title: 'Error',
-        message: 'Failed to upload document',
+        message: 'Failed to create document',
       );
     } finally {
       VFullScreenLoader.stopLoading();
@@ -159,8 +247,10 @@ class _CreateDocumentState extends State<CreateDocument> {
           _buildAreaSection(),
           _buildFishTypeSection(),
           _buildCustomersSection(),
+          _buildExpensesSection(),
+          mySize(100, 0, null),
         ],
-        child: myButton(context, true, _handleSubmit, 'Submit'),
+        child: myButton(context, true, _handleSubmit, 'Create Document'),
       ),
     );
   }

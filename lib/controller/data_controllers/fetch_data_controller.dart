@@ -12,6 +12,11 @@ class FetchDataController extends GetxController {
 
   // Observable variables
   final RxList<String> areas = <String>[].obs;
+  final searchQuery = ''.obs;
+  final RxList<QueryDocumentSnapshot> filteredDocuments =
+      <QueryDocumentSnapshot>[].obs;
+  final RxList<QueryDocumentSnapshot> allDocuments =
+      <QueryDocumentSnapshot>[].obs;
 
   // Fetch Methods
   Stream<QuerySnapshot> fetchRecentDocuments() {
@@ -57,8 +62,12 @@ class FetchDataController extends GetxController {
     }
   }
 
-  Widget buildDataList(BuildContext context, Stream<QuerySnapshot> stream,
-      {bool useSection = true}) {
+  Widget buildDataList(
+    BuildContext context,
+    Stream<QuerySnapshot> stream, {
+    bool useSection = true,
+    Function(QueryDocumentSnapshot)? onTapItem,
+  }) {
     return StreamBuilder<QuerySnapshot>(
       stream: stream,
       builder: (context, snapshot) {
@@ -72,41 +81,64 @@ class FetchDataController extends GetxController {
           return const Center(child: Text('No data created recently.'));
         }
 
+        // Store all documents
+        allDocuments.value = snapshot.data!.docs;
+
+        // Use filtered documents if search is active
+        final documents =
+            searchQuery.isEmpty ? snapshot.data!.docs : filteredDocuments;
+
         if (!useSection) {
-          return _buildSimpleList(context, snapshot.data!.docs);
+          return _buildSimpleList(context, documents, onTapItem);
         }
 
-        return _buildSectionedList(context, snapshot.data!.docs);
+        return _buildSectionedList(context, documents, onTapItem);
       },
     );
   }
 
   Widget _buildSimpleList(
-      BuildContext context, List<QueryDocumentSnapshot> docs) {
+    BuildContext context,
+    List<QueryDocumentSnapshot> docs,
+    Function(QueryDocumentSnapshot)? onTapItem,
+  ) {
     return SizedBox(
-      height: 300,
+      height:
+          docs.length >= MediaQuery.of(context).size.height / 2 ? 500.0 : 300.0,
       child: ListView.builder(
         shrinkWrap: true,
         itemCount: docs.length,
-        itemBuilder: (context, index) => DocumentCard(document: docs[index]),
+        itemBuilder: (context, index) => DocumentCard(
+          document: docs[index],
+          onTap: onTapItem != null ? () => onTapItem(docs[index]) : null,
+        ),
       ),
     );
   }
 
   Widget _buildSectionedList(
-      BuildContext context, List<QueryDocumentSnapshot> docs) {
+    BuildContext context,
+    List<QueryDocumentSnapshot> docs,
+    Function(QueryDocumentSnapshot)? onTapItem,
+  ) {
     final groupedDocs = _groupDocumentsByArea(docs);
     final areas = groupedDocs.keys.toList();
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height - 350.0,
+      height: areas.length <= 1
+          ? 150.0
+          : areas.length <= 4
+              ? 150
+              : areas.length * 150.0 >= 300.0
+                  ? 300.0
+                  : areas.length * 150.0,
       child: ListView.builder(
         shrinkWrap: true,
         itemCount: areas.length,
         itemBuilder: (context, index) {
           final area = areas[index];
           final areaDocs = groupedDocs[area]!;
-          return _buildAreaSection(context, area, areaDocs);
+          return _buildAreaSection(context, area, areaDocs, onTapItem);
         },
       ),
     );
@@ -123,7 +155,11 @@ class FetchDataController extends GetxController {
   }
 
   Widget _buildAreaSection(
-      BuildContext context, String area, List<QueryDocumentSnapshot> docs) {
+    BuildContext context,
+    String area,
+    List<QueryDocumentSnapshot> docs,
+    Function(QueryDocumentSnapshot)? onTapItem,
+  ) {
     return mySection(
       context,
       area,
@@ -135,11 +171,58 @@ class FetchDataController extends GetxController {
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: docs.length,
-            itemBuilder: (context, index) =>
-                DocumentCard(document: docs[index]),
+            itemBuilder: (context, index) => DocumentCard(
+              document: docs[index],
+              onTap: onTapItem != null ? () => onTapItem(docs[index]) : null,
+            ),
           ),
         ),
       ],
     );
+  }
+
+  Widget buildFilteredList(
+    BuildContext context,
+    Stream<QuerySnapshot> stream, {
+    bool useSection = true,
+    Function(QueryDocumentSnapshot)? onTapItem,
+  }) {
+    return GetBuilder<FetchDataController>(
+      init: this,
+      builder: (controller) => StreamBuilder<QuerySnapshot>(
+        stream: stream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const VCircularLoader();
+          }
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No data created recently.'));
+          }
+
+          final docs = snapshot.data!.docs;
+
+          // Filter documents based on search query
+          final filteredDocs = searchQuery.isEmpty
+              ? docs
+              : docs.where((doc) {
+                  final area = doc['area'].toString().toLowerCase();
+                  return area.contains(controller.searchQuery.toLowerCase());
+                }).toList();
+
+          if (!useSection) {
+            return _buildSimpleList(context, filteredDocs, onTapItem);
+          }
+          return _buildSectionedList(context, filteredDocs, onTapItem);
+        },
+      ),
+    );
+  }
+
+  void filterDocuments(String query) {
+    searchQuery.value = query;
+    update(); // This triggers a rebuild of GetBuilder widgets
   }
 }

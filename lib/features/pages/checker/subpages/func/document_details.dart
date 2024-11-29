@@ -25,6 +25,7 @@ class _DocumentDetailsState extends State<DocumentDetails> {
   late final TextEditingController fishTypeController;
   late final StoreDataController storeController;
   late List<Map<String, dynamic>> customers;
+  late List<Map<String, dynamic>> expenses;
   bool isEditing = false;
 
   @override
@@ -36,6 +37,7 @@ class _DocumentDetailsState extends State<DocumentDetails> {
         TextEditingController(text: widget.document['fishType']);
     customers =
         List<Map<String, dynamic>>.from(widget.document['customers'] ?? []);
+    expenses = List<Map<String, dynamic>>.from(widget.document['expenses'] ?? []);
   }
 
   Future<void> _updateDocument() async {
@@ -44,6 +46,7 @@ class _DocumentDetailsState extends State<DocumentDetails> {
         'area': areaController.text,
         'fishType': fishTypeController.text,
         'customers': customers,
+        'expenses': expenses,
         'date_time': widget.document['date_time'],
       };
 
@@ -185,6 +188,127 @@ class _DocumentDetailsState extends State<DocumentDetails> {
     });
   }
 
+  Future<void> _editExpense(int index) async {
+    final expense = expenses[index];
+    final categoryController = TextEditingController(text: expense['category']);
+    final amountController = TextEditingController(text: expense['amount']);
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Expense'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            myText(
+              label: 'Category',
+              context: context,
+              controller: categoryController,
+              inputType: TextInputType.text,
+              action: TextInputAction.next,
+            ),
+            mySize(10, 0, null),
+            myText(
+              label: 'Amount',
+              context: context,
+              controller: amountController,
+              inputType: TextInputType.number,
+              action: TextInputAction.done,
+              prefix: '₱',
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          myButton(
+            context,
+            false,
+            () {
+              if (categoryController.text.isNotEmpty &&
+                  amountController.text.isNotEmpty) {
+                setState(() {
+                  expenses[index] = {
+                    'category': categoryController.text,
+                    'amount': amountController.text,
+                  };
+                });
+                Navigator.pop(context);
+              }
+            },
+            'Save',
+          ),
+        ],
+      ),
+    );
+
+    categoryController.dispose();
+    amountController.dispose();
+  }
+
+  Future<void> _addNewExpense() async {
+    final categoryController = TextEditingController();
+    final amountController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Expense'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            myText(
+              label: 'Category',
+              context: context,
+              controller: categoryController,
+              inputType: TextInputType.text,
+              action: TextInputAction.next,
+            ),
+            mySize(10, 0, null),
+            myText(
+              label: 'Amount',
+              context: context,
+              controller: amountController,
+              inputType: TextInputType.number,
+              action: TextInputAction.done,
+              prefix: '₱',
+            ),
+          ],
+        ),
+        actions: [
+          myButton(
+            context,
+            false,
+            () {
+              if (categoryController.text.isNotEmpty &&
+                  amountController.text.isNotEmpty) {
+                setState(() {
+                  expenses.add({
+                    'category': categoryController.text,
+                    'amount': amountController.text,
+                  });
+                });
+                Navigator.pop(context);
+              }
+            },
+            'Add',
+          ),
+        ],
+      ),
+    );
+
+    categoryController.dispose();
+    amountController.dispose();
+  }
+
+  void _deleteExpense(int index) {
+    setState(() {
+      expenses.removeAt(index);
+    });
+  }
+
   Widget _buildAreaSection() {
     return mySection(context, 'Area', [
       myText(
@@ -287,6 +411,82 @@ class _DocumentDetailsState extends State<DocumentDetails> {
     );
   }
 
+  Widget _buildExpensesSection() {
+    return mySection(
+      context,
+      'Expenses',
+      [
+        _buildExpenseHeader(),
+        _buildExpenseList(),
+      ],
+    );
+  }
+
+  Widget _buildExpenseHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Text('Category', style: Theme.of(context).textTheme.labelSmall),
+        Text('Amount', style: Theme.of(context).textTheme.labelSmall),
+      ],
+    );
+  }
+
+  Widget _buildExpenseList() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.light
+            ? VColors.accent
+            : VColors.darkAccent,
+        borderRadius: BorderRadius.circular(5),
+      ),
+      width: double.infinity,
+      child: Column(
+        children: [
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: expenses.length,
+            itemBuilder: (context, index) {
+              final expense = expenses[index];
+              return _buildExpenseListItem(index, expense);
+            },
+          ),
+          if (isEditing)
+            myButton(
+              context,
+              false,
+              _addNewExpense,
+              'Add Expense',
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpenseListItem(int index, Map<String, dynamic> expense) {
+    return ListTile(
+      title: Row(
+        children: [
+          Text(
+            expense['category'],
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+          const Spacer(),
+          Text(
+            '₱${expense['amount']}',
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+          if (isEditing)
+            IconButton(
+              onPressed: () => _deleteExpense(index),
+              icon: const Icon(Iconsax.trash, color: VColors.error),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -332,6 +532,7 @@ class _DocumentDetailsState extends State<DocumentDetails> {
             _buildFishTypeSection(),
             _buildDateSection(context),
             _buildCustomersSection(),
+            _buildExpensesSection(),
             mySize(100, 0, null),
           ],
           child: isEditing
@@ -345,12 +546,32 @@ class _DocumentDetailsState extends State<DocumentDetails> {
   Widget _buildDateSection(BuildContext context) {
     return mySection(
       context,
-      'Date',
+      'Date Created',
       [
-        Text(
-          DateFormat('MMMM dd yyyy, h:mm a')
-              .format(widget.document['date_time'].toDate()),
-          style: Theme.of(context).textTheme.bodyLarge,
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.light
+                ? VColors.accent
+                : VColors.darkAccent,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DateFormat('MMMM dd yyyy').format(widget.document['date_time'].toDate()),
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                Text(
+                  DateFormat('h:mm a').format(widget.document['date_time'].toDate()),
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );

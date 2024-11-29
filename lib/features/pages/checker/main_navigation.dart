@@ -27,8 +27,6 @@ class MainNavigation extends StatelessWidget {
             NavigationDestination(icon: Icon(VIcons.homeIcon), label: 'Home'),
             NavigationDestination(
                 icon: Icon(VIcons.documentsIcon), label: 'Documents'),
-            NavigationDestination(
-                icon: Icon(VIcons.expensesIcon), label: 'Expenses'),
             NavigationDestination(icon: Icon(VIcons.reports), label: 'Reports'),
           ],
         ),

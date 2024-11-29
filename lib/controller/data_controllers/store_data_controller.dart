@@ -19,6 +19,8 @@ class StoreDataController extends GetxController {
   final TextEditingController fishTypeController = TextEditingController();
   final TextEditingController customerNameController = TextEditingController();
   final TextEditingController customerKiloController = TextEditingController();
+  final TextEditingController expenseCategoryController = TextEditingController();
+  final TextEditingController expenseAmountController = TextEditingController();
 
   // Observable variables
   final RxMap<int, Map<String, dynamic>> tempCustomers =
@@ -26,6 +28,9 @@ class StoreDataController extends GetxController {
   final RxMap<String, dynamic> customersFinal = <String, dynamic>{}.obs;
   RxInt customerId = 0.obs;
   final List<Map<String, String>> customersLists = [];
+  final RxMap<int, Map<String, dynamic>> tempExpenses = <int, Map<String, dynamic>>{}.obs;
+  RxInt expenseId = 0.obs;
+  final List<Map<String, String>> expensesLists = [];
 
   void addCustomer(String name, String kilo) {
     if (name.isEmpty || kilo.isEmpty) return;
@@ -55,13 +60,35 @@ class StoreDataController extends GetxController {
   }
 
   void clearInputs() {
+    // Clear text controllers
     areaController.clear();
     fishTypeController.clear();
+    customerNameController.clear();
+    customerKiloController.clear();
+    expenseCategoryController.clear();
+    expenseAmountController.clear();
+
+    // Clear temporary maps
+    tempCustomers.clear();
+    tempExpenses.clear();
+
+    // Reset IDs
+    customerId.value = 0;
+    expenseId.value = 0;
+
+    // Clear lists
+    customersLists.clear();
+    expensesLists.clear();
   }
 
   void clearCustomerInputs() {
     customerNameController.clear();
     customerKiloController.clear();
+  }
+
+  void clearExpenseInputs() {
+    expenseCategoryController.clear();
+    expenseAmountController.clear();
   }
 
   Future<void> storeDocument(dynamic document) async {
@@ -138,12 +165,89 @@ class StoreDataController extends GetxController {
     }
   }
 
+  void addExpense(String category, String amount) {
+    if (category.isEmpty || amount.isEmpty) return;
+    expenseId++;
+    tempExpenses[expenseId.value] = {
+      'uid': user.uid,
+      'expenseId': expenseId.value,
+      'category': category,
+      'amount': amount,
+    };
+    updateExpensesList();
+  }
+
+  void deleteExpense(int id) {
+    tempExpenses.remove(id);
+    updateExpensesList();
+  }
+
+  void updateExpensesList() {
+    expensesLists.clear();
+    tempExpenses.forEach((_, value) {
+      expensesLists.add({
+        'category': value['category'],
+        'amount': value['amount'],
+      });
+    });
+  }
+
+  Future<void> addExpenseDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Expense'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            myText(
+              label: 'Category',
+              context: context,
+              controller: expenseCategoryController,
+              inputType: TextInputType.text,
+              action: TextInputAction.next,
+            ),
+            mySize(10, 0, null),
+            myText(
+              label: 'Amount',
+              context: context,
+              controller: expenseAmountController,
+              inputType: TextInputType.number,
+              action: TextInputAction.done,
+              prefix: '₱',
+            ),
+          ],
+        ),
+        actions: [
+          myButton(
+            context,
+            false,
+            () {
+              if (expenseCategoryController.text.isNotEmpty &&
+                  expenseAmountController.text.isNotEmpty) {
+                addExpense(
+                  expenseCategoryController.text,
+                  expenseAmountController.text,
+                );
+                clearExpenseInputs();
+                Navigator.pop(context);
+              }
+            },
+            'Add',
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void onClose() {
     areaController.dispose();
     fishTypeController.dispose();
     customerNameController.dispose();
     customerKiloController.dispose();
+    expenseCategoryController.dispose();
+    expenseAmountController.dispose();
     super.onClose();
   }
 }
