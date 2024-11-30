@@ -5,10 +5,12 @@ import 'package:vessel_vault/utilities/constants/time_stamps.dart';
 import 'package:vessel_vault/utilities/loaders/circular_loader.dart';
 import '../../features/pages/checker/subpages/func/document_card.dart';
 import '../../utilities/functions/reusable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FetchDataController extends GetxController {
   // Firebase instances
   final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
   // Observable variables
   final RxList<String> areas = <String>[].obs;
@@ -20,16 +22,20 @@ class FetchDataController extends GetxController {
 
   // Fetch Methods
   Stream<QuerySnapshot> fetchRecentDocuments() {
+    final currentUser = _auth.currentUser;
     return _firestore
         .collection('documents')
+        .where('uid', isEqualTo: currentUser?.uid)
         .orderBy('date_time', descending: true)
         .where('date_time', isGreaterThanOrEqualTo: VTimeStamps.getDateFrom(1))
         .snapshots();
   }
 
   Stream<QuerySnapshot> fetchAllDocuments() {
+    final currentUser = _auth.currentUser;
     return _firestore
         .collection('documents')
+        .where('uid', isEqualTo: currentUser?.uid)
         .orderBy('date_time', descending: true)
         .snapshots();
   }

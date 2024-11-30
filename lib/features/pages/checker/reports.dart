@@ -40,7 +40,7 @@ class Reports extends StatelessWidget {
                   } catch (e) {
                     VLoaders.errorSnackBar(
                       title: 'Error',
-                      message: 'Failed to generate report',
+                      message: 'Failed to generate report: $e',
                     );
                   } finally {
                     VFullScreenLoader.stopLoading();

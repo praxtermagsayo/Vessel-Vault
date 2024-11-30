@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:vessel_vault/features/models/document_model.dart';
-import 'package:vessel_vault/features/models/expense_model.dart';
 import 'package:vessel_vault/controller/data_controllers/store_data_controller.dart';
 import 'package:vessel_vault/utilities/constants/colors.dart';
 import 'package:vessel_vault/utilities/functions/reusable.dart';
@@ -205,7 +203,6 @@ class _CreateDocumentState extends State<CreateDocument> {
 
   Future<void> _handleSubmit() async {
     try {
-
       controller.updateCustomersList();
       controller.updateExpensesList();
 
