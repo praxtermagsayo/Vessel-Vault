@@ -37,8 +37,12 @@ class Documents extends StatelessWidget {
             ),
           ]),
         ],
-        child: myButton(context, true,
-            () => Get.to(() => const CreateDocument()), 'New Document'),
+        child: myButton(
+          context: context,
+          isPrimary: true,
+          onTap: () => Get.to(() => const CreateDocument()),
+          label: 'New Document',
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vessel_vault/controller/data_controllers/fetch_data_controller.dart';
+import '../../../utilities/functions/fireauth_services.dart';
 import '../../../utilities/functions/reusable.dart';
 
 class Home extends StatefulWidget {
@@ -30,6 +31,14 @@ class _HomeState extends State<Home> {
             },
           ),
           myDoubleNav(context),
+          myButton(
+            context: context,
+            isPrimary: true,
+            onTap: () {
+              FireAuthServices.signOut(context);
+            },
+            label: 'temp',
+          ),
           mySection(
             context,
             'Recent Documents',

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:vessel_vault/features/pages/checker/subpages/theme_options.dart';
 import 'package:vessel_vault/utilities/constants/images.dart';
 import 'package:vessel_vault/utilities/popups/loaders.dart';
@@ -9,10 +10,12 @@ import '../../../../utilities/functions/reusable.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../utilities/loaders/circular_loader.dart';
+
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-    void changeProfilePicture(BuildContext context) async {
+  void changeProfilePicture(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
@@ -20,26 +23,22 @@ class SettingsPage extends StatelessWidget {
       maxWidth: 512,
       maxHeight: 512,
     );
-    
+
     if (image != null) {
       try {
         final user = FirebaseAuth.instance.currentUser!;
-        
+
         final bytes = await image.readAsBytes();
         final base64Image = base64Encode(bytes);
-        
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set({
+
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'email': user.email,
-          'name': user.displayName,
           'profileImage': base64Image,
           'lastUpdated': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
-        
+
         await user.updatePhotoURL('has_stored_image');
-        
+
         VLoaders.successSnackBar(
           title: 'Profile Picture Updated',
           message: 'Your profile picture has been updated successfully.',
@@ -81,6 +80,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser!;
+
     return Scaffold(
       appBar: myAppBar(context: context, title: 'Settings'),
       body: myBody(
@@ -88,13 +88,29 @@ class SettingsPage extends StatelessWidget {
           children: [
             Column(
               children: [
-                myProfile(
-                  context,
-                  '${user.displayName}',
-                  '${user.email}',
-                  getProfileImage(user.uid, VImages.userProfile),
-                  150,
-                  onImageTap: () => changeProfilePicture(context),
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .where('email', isEqualTo: user.email)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: VCircularLoader(),
+                      );
+                    }
+                    if (snapshot.hasData) {
+                      return myProfile(
+                        context,
+                        '${user.displayName ?? snapshot.data?.docs[0]['firstName'] + ' ' + snapshot.data?.docs[0]['lastName']}',
+                        '${user.email}',
+                        getProfileImage(user.uid, VImages.userProfile),
+                        150,
+                        onImageTap: () => changeProfilePicture(context),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
                 ),
                 mySection(context, 'Preferences', [
                   myNavigationButton(context, () {
@@ -104,9 +120,15 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ],
-          child: myButton(context, false, () {
-            logOutDialog(context);
-          }, 'Logout')),
+          child: myButton(
+            context: context,
+            isPrimary: false,
+            onTap: () {
+              logOutDialog(context);
+            },
+            label: 'Logout',
+            icon: Iconsax.logout
+          )),
     );
   }
 }

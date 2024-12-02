@@ -115,10 +115,10 @@ class _CreateDocumentState extends State<CreateDocument> {
             },
           ),
           myButton(
-            context,
-            false,
-            () => controller.addCustomerDialog(context),
-            'Add Customer',
+            context: context,
+            isPrimary: false,
+            onTap: () => controller.addCustomerDialog(context),
+            label: 'Add Customer',
           ),
         ],
       ),
@@ -169,10 +169,10 @@ class _CreateDocumentState extends State<CreateDocument> {
             },
           ),
           myButton(
-            context,
-            false,
-            () => controller.addExpenseDialog(context),
-            'Add Expense',
+            context: context,
+            isPrimary: false,
+            onTap: () => controller.addExpenseDialog(context),
+            label: 'Add Expense',
           ),
         ],
       ),
@@ -247,7 +247,12 @@ class _CreateDocumentState extends State<CreateDocument> {
           _buildExpensesSection(),
           mySize(100, 0, null),
         ],
-        child: myButton(context, true, _handleSubmit, 'Create Document'),
+        child: myButton(
+          context: context,
+          isPrimary: true,
+          onTap: _handleSubmit,
+          label: 'Create Document',
+        ),
       ),
     );
   }

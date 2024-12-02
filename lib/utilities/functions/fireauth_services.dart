@@ -18,8 +18,6 @@ class FireAuthServices {
           .signInWithEmailAndPassword(email: email.trim(), password: password);
       if (context.mounted) {
         Navigator.pop(context);
-        VLoaders.successSnackBar(
-            title: 'Logged In', message: 'Welcome ${email.trim()}');
       }
     } on FirebaseAuthException catch (e) {
       if (context.mounted) {
@@ -29,6 +27,7 @@ class FireAuthServices {
             message: _getReadableErrorMessage(e.code));
         debugPrint(e.code);
       }
+      debugPrint(e.code);
     }
   }
 

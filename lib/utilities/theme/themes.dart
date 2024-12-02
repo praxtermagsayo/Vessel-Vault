@@ -14,7 +14,9 @@ class Vtheme {
     brightness: Brightness.light,
     primaryColor: VColors.primary,
     scaffoldBackgroundColor: VColors.lightBackground,
-    textTheme: VTextTheme.lightTextTheme,
+    textTheme: VTextTheme.lightTextTheme.apply(
+      fontFamily: 'Poppins',
+    ),
     inputDecorationTheme: VInputDecoration.lightInputDecorationTheme,
     elevatedButtonTheme: VElevatedButtonTheme.lightElevatedButtonTheme,
     cardTheme: VCardTheme.lightCardTheme,
@@ -26,7 +28,9 @@ class Vtheme {
     brightness: Brightness.dark,
     primaryColor: VColors.primary,
     scaffoldBackgroundColor: VColors.darkBackground,
-    textTheme: VTextTheme.darkTextTheme,
+    textTheme: VTextTheme.darkTextTheme.apply(
+      fontFamily: 'Poppins',
+    ),
     inputDecorationTheme: VInputDecoration.darkInputDecorationTheme,
     elevatedButtonTheme: VElevatedButtonTheme.darkElevatedButtonTheme,
     cardTheme: VCardTheme.darkCardTheme,

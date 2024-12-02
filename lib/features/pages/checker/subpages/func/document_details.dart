@@ -104,9 +104,9 @@ class _DocumentDetailsState extends State<DocumentDetails> {
             child: const Text('Cancel'),
           ),
           myButton(
-            context,
-            false,
-            () {
+            context: context  ,
+            isPrimary: false,
+            onTap: () {
               if (nameController.text.isNotEmpty &&
                   kiloController.text.isNotEmpty) {
                 setState(() {
@@ -118,7 +118,7 @@ class _DocumentDetailsState extends State<DocumentDetails> {
                 Navigator.pop(context);
               }
             },
-            'Save',
+            label: 'Save',
           ),
         ],
       ),
@@ -158,9 +158,9 @@ class _DocumentDetailsState extends State<DocumentDetails> {
         ),
         actions: [
           myButton(
-            context,
-            false,
-            () {
+            context: context,
+            isPrimary: false,
+            onTap: () {
               if (nameController.text.isNotEmpty &&
                   kiloController.text.isNotEmpty) {
                 setState(() {
@@ -172,7 +172,7 @@ class _DocumentDetailsState extends State<DocumentDetails> {
                 Navigator.pop(context);
               }
             },
-            'Add',
+            label: 'Add',
           ),
         ],
       ),
@@ -224,9 +224,9 @@ class _DocumentDetailsState extends State<DocumentDetails> {
             child: const Text('Cancel'),
           ),
           myButton(
-            context,
-            false,
-            () {
+            context: context,
+            isPrimary: false,
+            onTap: () {
               if (categoryController.text.isNotEmpty &&
                   amountController.text.isNotEmpty) {
                 setState(() {
@@ -238,7 +238,7 @@ class _DocumentDetailsState extends State<DocumentDetails> {
                 Navigator.pop(context);
               }
             },
-            'Save',
+            label: 'Save',
           ),
         ],
       ),
@@ -279,9 +279,9 @@ class _DocumentDetailsState extends State<DocumentDetails> {
         ),
         actions: [
           myButton(
-            context,
-            false,
-            () {
+            context: context,
+            isPrimary: false,
+            onTap: () {
               if (categoryController.text.isNotEmpty &&
                   amountController.text.isNotEmpty) {
                 setState(() {
@@ -293,7 +293,7 @@ class _DocumentDetailsState extends State<DocumentDetails> {
                 Navigator.pop(context);
               }
             },
-            'Add',
+            label: 'Add',
           ),
         ],
       ),
@@ -401,10 +401,10 @@ class _DocumentDetailsState extends State<DocumentDetails> {
           ),
           if (isEditing)
             myButton(
-              context,
-              false,
-              _addNewCustomer,
-              'Add Customer',
+              context: context,
+              isPrimary: false,
+              onTap: _addNewCustomer,
+              label: 'Add Customer',
             ),
         ],
       ),
@@ -454,10 +454,10 @@ class _DocumentDetailsState extends State<DocumentDetails> {
           ),
           if (isEditing)
             myButton(
-              context,
-              false,
-              _addNewExpense,
-              'Add Expense',
+              context: context,
+              isPrimary: false,
+              onTap: _addNewExpense,
+              label: 'Add Expense',
             ),
         ],
       ),
@@ -536,7 +536,12 @@ class _DocumentDetailsState extends State<DocumentDetails> {
             mySize(100, 0, null),
           ],
           child: isEditing
-              ? myButton(context, true, _updateDocument, 'Update')
+              ? myButton(
+                  context: context,
+                  isPrimary: true,
+                  onTap: _updateDocument,
+                  label: 'Update',
+                )
               : null,
         ),
       ),

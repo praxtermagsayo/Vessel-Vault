@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'terms_conditions.dart';
 import '../../utilities/functions/reusable.dart';
 import '../../controller/data_controllers/register_controller.dart';
 
@@ -91,13 +92,21 @@ class RegisterPage extends GetView<RegisterController> {
                         value: controller.termsAccepted.value,
                         onChanged: controller.toggleTerms,
                       )),
-                  const Expanded(
-                    child: Text('I accept the terms and conditions'),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => TermsAndConditions.showTermsDialog(),
+                      child: Text(
+                        'I accept the terms and conditions',
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
               mySize(20, 0, null),
-              myButton(context, true, controller.register, 'Register'),
+              myButton(context: context, isPrimary: true, onTap: controller.register, label: 'Register'),
             ],
           ),
         ),

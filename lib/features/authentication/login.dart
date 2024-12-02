@@ -71,30 +71,41 @@ class Login extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const Text('Don\'t have an account?'),
+                        mySize(0, 5, null),
                         TextButton(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                          ),
                           onPressed: () {
                             Get.to(() => const RegisterPage());
                           },
                           child: Text(
                             'Create an account',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ],
                     ),
-                    myButton(context, true, () {
-                      FireAuthServices.signIn(context, controller.email.text,
-                          controller.password.text);
+                    myButton(context: context, isPrimary: true, onTap: () async {
+                      await FireAuthServices.signIn(context,
+                          controller.email.text, controller.password.text);
                       controller.clearInputs();
-                    }, 'Login'),
+                    }, label: 'Login'),
                     mySize(10, 0, null),
-                    myButton(context, false, () {
+                    myButton(context: context, isPrimary: false, onTap: () {
                       Get.to(() => const ForgotPassword());
-                    }, 'Forgot Password'),
+                    }, label: 'Forgot Password'),
                     mySize(40, 0, null),
-                    myButton(context, false, () {
-                      Get.to(() => const RegisterPage());
-                    }, 'Login with Gmail'),
+                    const Text('OR'),
+                    mySize(40, 0, null),
+                    myButton(context: context, isPrimary: false, onTap: () async {
+                      await FireAuthServices.signInWithGoogle(context);
+                    }, label: 'Login with Gmail', image: 'assets/icon/google_logo.png'),
                   ],
                 ),
               ),

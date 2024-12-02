@@ -74,15 +74,20 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 ),
                 mySize(20, 0, null),
                 myButton(
-                  context,
-                  true,
-                  resetPassword,
-                  'Send Reset Link',
+                  context: context,
+                  isPrimary: true,
+                  onTap: resetPassword,
+                  label: 'Send Reset Link',
                 ),
                 mySize(10, 0, null),
-                myButton(context, false, () {
-                  Get.to(const Login());
-                }, 'Sign in'),
+                myButton(
+                  context: context,
+                  isPrimary: false,
+                  onTap: () {
+                    Get.to(const Login());
+                  },
+                  label: 'Sign in',
+                ),
               ],
             ),
           ),

@@ -129,15 +129,20 @@ class StoreDataController extends GetxController {
           ],
         ),
         actions: [
-          myButton(context, false, () {
-            if (customerNameController.text.isNotEmpty &&
-                customerKiloController.text.isNotEmpty) {
+          myButton(
+            context: context,
+            isPrimary: false,
+            onTap: () {
+              if (customerNameController.text.isNotEmpty &&
+                  customerKiloController.text.isNotEmpty) {
               addCustomer(
                   customerNameController.text, customerKiloController.text);
               clearCustomerInputs();
               Navigator.pop(context);
-            }
-          }, 'Add'),
+              }
+            },
+            label: 'Add',
+          ),
         ],
       ),
     );
@@ -220,9 +225,9 @@ class StoreDataController extends GetxController {
         ),
         actions: [
           myButton(
-            context,
-            false,
-            () {
+            context: context,
+            isPrimary: false,
+            onTap: () {
               if (expenseCategoryController.text.isNotEmpty &&
                   expenseAmountController.text.isNotEmpty) {
                 addExpense(
@@ -233,7 +238,7 @@ class StoreDataController extends GetxController {
                 Navigator.pop(context);
               }
             },
-            'Add',
+            label: 'Add',
           ),
         ],
       ),

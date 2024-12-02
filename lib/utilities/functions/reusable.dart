@@ -118,10 +118,12 @@ TextButton myTextButton(
 }
 
 Widget myButton(
-  BuildContext context,
-  bool isPrimary,
-  VoidCallback onTap,
-  String label,
+  {required BuildContext context,
+  required bool isPrimary,
+  required VoidCallback onTap,
+  required String label,
+  IconData? icon,
+  String? image,}
 ) {
   return ElevatedButton(
     onPressed: onTap,
@@ -151,26 +153,32 @@ Widget myButton(
         borderRadius: BorderRadius.circular(5),
       ),
     ),
-    child: label != 'Logout'
-        ? Text(
-            label,
-            style: TextStyle(
-              fontSize: Theme.of(context).textTheme.labelMedium?.fontSize,
-            ),
-          )
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.logout),
-              mySize(0, 10, null),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: Theme.of(context).textTheme.labelMedium?.fontSize,
-                ),
-              ),
-            ],
-          ),
+    child: 
+    icon != null || image != null ?
+    icon != null ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(icon), mySize(0, 10, null), Text(label, style: Theme.of(context).textTheme.labelMedium)]) :
+    image != null ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [mySize(30, 30, Image.asset(image)), mySize(0, 10, null), Text(label, style: Theme.of(context).textTheme.labelMedium)]) :
+    Text(label, style: Theme.of(context).textTheme.labelMedium) :
+    Text(label, style: Theme.of(context).textTheme.labelMedium),
+    // child: label != 'Logout'
+    //     ? Text(
+    //         label,
+    //         style: TextStyle(
+    //           fontSize: Theme.of(context).textTheme.labelMedium?.fontSize,
+    //         ),
+    //       )
+    //     : Row(
+    //         mainAxisAlignment: MainAxisAlignment.center,
+    //         children: [
+    //           const Icon(Icons.logout),
+    //           mySize(0, 10, null),
+    //           Text(
+    //             label,
+    //             style: TextStyle(
+    //               fontSize: Theme.of(context).textTheme.labelMedium?.fontSize,
+    //             ),
+    //           ),
+    //         ],
+    //       ),
   );
 }
 
