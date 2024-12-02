@@ -110,7 +110,7 @@ class RegisterController extends GetxController {
 
     if (isFormValid) {
       // Call the new registration method with OTP
-      FireAuthServices.createUserWithEmailAndOTP(
+      FireAuthServices.createUserWithEmailVerification(
         Get.context!,
         emailController.text,
         passwordController.text,

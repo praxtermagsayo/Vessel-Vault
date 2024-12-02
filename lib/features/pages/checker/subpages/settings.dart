@@ -40,12 +40,14 @@ class SettingsPage extends StatelessWidget {
         
         await user.updatePhotoURL('has_stored_image');
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile picture updated successfully')),
+        VLoaders.successSnackBar(
+          title: 'Profile Picture Updated',
+          message: 'Your profile picture has been updated successfully.',
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile picture: $e')),
+        VLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Failed to update profile picture. Please try again.',
         );
       }
     }

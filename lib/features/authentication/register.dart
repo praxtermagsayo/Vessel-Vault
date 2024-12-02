@@ -9,7 +9,6 @@ class RegisterPage extends GetView<RegisterController> {
   @override
   Widget build(BuildContext context) {
     Get.put(RegisterController());
-    bool obscure = true;
 
     return Scaffold(
       appBar: myAppBar(context: context, title: 'Register'),
