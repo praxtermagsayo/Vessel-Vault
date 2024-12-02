@@ -6,6 +6,7 @@ import 'package:vessel_vault/features/authentication/forgot_password.dart';
 import '../../utilities/functions/fireauth_services.dart';
 import '../../utilities/functions/reusable.dart';
 import '../../utilities/providers/theme_provider.dart';
+import 'register.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
@@ -66,7 +67,21 @@ class Login extends StatelessWidget {
                               : Icons.visibility_off),
                           action: TextInputAction.done),
                     ),
-                    mySize(30, 0, null),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text('Don\'t have an account?'),
+                        TextButton(
+                          onPressed: () {
+                            Get.to(() => const RegisterPage());
+                          },
+                          child: Text(
+                            'Create an account',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
                     myButton(context, true, () {
                       FireAuthServices.signIn(context, controller.email.text,
                           controller.password.text);
@@ -76,6 +91,10 @@ class Login extends StatelessWidget {
                     myButton(context, false, () {
                       Get.to(() => const ForgotPassword());
                     }, 'Forgot Password'),
+                    mySize(40, 0, null),
+                    myButton(context, false, () {
+                      Get.to(() => const RegisterPage());
+                    }, 'Login with Gmail'),
                   ],
                 ),
               ),

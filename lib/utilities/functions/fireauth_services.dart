@@ -6,6 +6,10 @@ import 'package:vessel_vault/features/authentication/auth.dart';
 import 'package:vessel_vault/features/authentication/login.dart';
 import 'package:vessel_vault/utilities/loaders/full_screen_loader.dart';
 import 'package:vessel_vault/utilities/popups/loaders.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
+
+import '../../features/authentication/otp.dart';
 
 class FireAuthServices {
   static Future<void> signIn(
@@ -137,6 +141,162 @@ class FireAuthServices {
             content: Text(e.message ?? 'An error occurred'),
             backgroundColor: Colors.red,
           ),
+        );
+      }
+    }
+  }
+
+  static Future<void> createUserWithEmailAndOTP(
+    BuildContext context,
+    String email,
+    String password,
+    String firstName,
+    String lastName,
+    String? middleName,
+  ) async {
+    VFullScreenLoader.openLoadingDialog(
+        'Sending OTP', 'assets/images/animations/loading.json');
+    try {
+      // Generate a 6-digit OTP
+      final String otp = (100000 + Random().nextInt(899999)).toString();
+
+      // Store pending registration in Firestore with OTP
+      final docRef = FirebaseFirestore.instance.collection('pending_registrations').doc();
+      await docRef.set({
+        'email': email.trim(),
+        'firstName': firstName,
+        'lastName': lastName,
+        'middleName': middleName,
+        'otp': otp,
+        'password': password, // Consider encrypting this
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': Timestamp.fromDate(
+          DateTime.now().add(const Duration(minutes: 15)),
+        ),
+      });
+
+      // Send OTP email using Firebase Cloud Functions or your backend
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        // Navigate to OTP verification screen
+        Get.to(() => OTPVerificationScreen(
+              email: email,
+              registrationId: docRef.id,
+            ));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        VLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Failed to initiate registration. Please try again.',
+        );
+      }
+    }
+  }
+
+  // Verify OTP and complete registration
+  static Future<void> verifyOTPAndCreateAccount(
+    BuildContext context,
+    String registrationId,
+    String otp,
+  ) async {
+    VFullScreenLoader.openLoadingDialog(
+        'Verifying', 'assets/images/animations/loading.json');
+    try {
+      // Get pending registration
+      final doc = await FirebaseFirestore.instance
+          .collection('pending_registrations')
+          .doc(registrationId)
+          .get();
+
+      if (!doc.exists) {
+        throw 'Registration not found';
+      }
+
+      final data = doc.data()!;
+      
+      if (data['otp'] != otp) {
+        throw 'Invalid OTP';
+      }
+
+      if ((data['expiresAt'] as Timestamp).toDate().isBefore(DateTime.now())) {
+        throw 'OTP expired';
+      }
+
+      // Create Firebase Auth account
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: data['email'], password: data['password']);
+
+      // Store user data in Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'email': data['email'],
+        'firstName': data['firstName'],
+        'lastName': data['lastName'],
+        'middleName': data['middleName'],
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Delete pending registration
+      await doc.reference.delete();
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        VLoaders.successSnackBar(
+          title: 'Account Created',
+          message: 'You can now log in with your email and password.',
+        );
+        Get.to(() => const Login());
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        VLoaders.errorSnackBar(
+          title: 'Error',
+          message: e.toString(),
+        );
+      }
+    }
+  }
+
+  static Future<void> resendOTP(BuildContext context, String registrationId) async {
+    VFullScreenLoader.openLoadingDialog(
+        'Resending OTP', 'assets/images/animations/loading.json');
+    try {
+      // Generate new OTP
+      final String newOtp = (100000 + Random().nextInt(899999)).toString();
+      
+      // Update the document with new OTP and expiration
+      await FirebaseFirestore.instance
+          .collection('pending_registrations')
+          .doc(registrationId)
+          .update({
+        'otp': newOtp,
+        'expiresAt': Timestamp.fromDate(
+          DateTime.now().add(const Duration(minutes: 15)),
+        ),
+      });
+
+      // Send new OTP email using Firebase Cloud Functions or your backend
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        VLoaders.successSnackBar(
+          title: 'OTP Resent',
+          message: 'Please check your email for the new verification code.',
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        VLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'Failed to resend OTP. Please try again.',
         );
       }
     }

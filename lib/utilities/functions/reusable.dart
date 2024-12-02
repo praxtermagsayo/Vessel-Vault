@@ -8,6 +8,9 @@ import 'package:vessel_vault/utilities/constants/icons.dart';
 import 'package:vessel_vault/utilities/functions/fireauth_services.dart';
 import '../../features/pages/checker/subpages/func/create_document.dart';
 import '../constants/images.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 
 Widget myText({
   required BuildContext context,
@@ -21,6 +24,8 @@ Widget myText({
   Widget? suffix,
   String? prefix,
   TextInputAction action = TextInputAction.done,
+  Function(String)? onChanged,
+  String? Function(String?)? validator,
 }) {
   final isWeb = MediaQuery.of(context).size.width > 600;
 
@@ -34,7 +39,9 @@ Widget myText({
         ),
         mySize(8, 0, null),
       ],
-      TextField(
+      TextFormField(
+        validator: validator,
+        onChanged: onChanged,
         controller: controller,
         enabled: enabled,
         obscureText: obscure,
@@ -264,6 +271,8 @@ Widget myImageButton({
   Color? borderColor,
   required VoidCallback onTap,
 }) {
+  final user = FirebaseAuth.instance.currentUser;
+  
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: size / 2),
     child: InkWell(
@@ -280,9 +289,27 @@ Widget myImageButton({
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(size / 2),
-          child: Image.asset(
-            imagePath,
-            fit: BoxFit.cover,
+          child: StreamBuilder<DocumentSnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(user?.uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && 
+                  snapshot.data!.exists && 
+                  (snapshot.data!.data() as Map<String, dynamic>)['profileImage'] != null) {
+                final imageBytes = base64Decode(
+                    (snapshot.data!.data() as Map<String, dynamic>)['profileImage']);
+                return Image.memory(
+                  imageBytes,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(imagePath, fit: BoxFit.cover);
+                  },
+                );
+              }
+              return Image.asset(imagePath, fit: BoxFit.cover);
+            },
           ),
         ),
       ),
@@ -433,15 +460,15 @@ Widget buildAreaSection(BuildContext context, String title, String type) {
   );
 }
 
-Widget myProfile(BuildContext context, String email, String name, String image,
-    double size) {
+Widget myProfile(BuildContext context, String email, String name, Widget image,
+    double size, {VoidCallback? onImageTap}) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Padding(
         padding: EdgeInsets.symmetric(horizontal: size / 2),
         child: InkWell(
-          onTap: () {},
+          onTap: onImageTap,
           borderRadius: BorderRadius.circular(size / 2),
           child: Container(
             width: size,
@@ -451,10 +478,7 @@ Widget myProfile(BuildContext context, String email, String name, String image,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(size / 2),
-              child: Image.asset(
-                image,
-                fit: BoxFit.cover,
-              ),
+              child: image,
             ),
           ),
         ),
