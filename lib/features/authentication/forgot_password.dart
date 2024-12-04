@@ -22,7 +22,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         email: emailCon.text.trim(),
       );
       if (mounted) {
-        Navigator.pop(context); // Dismiss loading
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Password reset email sent! Check your inbox.'),
@@ -33,7 +33,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Dismiss loading
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.message ?? 'An error occurred'),

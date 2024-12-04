@@ -16,18 +16,15 @@ class FireAuthServices {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email.trim(), password: password);
-      if (context.mounted) {
-        Navigator.pop(context);
-      }
+      VFullScreenLoader.stopLoading();
+      VLoaders.successSnackBar(
+          title: 'Login Successful',
+          message: 'Welcome to Vessel Vault! ${email.trim()}');
     } on FirebaseAuthException catch (e) {
-      if (context.mounted) {
-        Navigator.pop(context);
-        VLoaders.errorSnackBar(
-            title: e.code.toString(),
-            message: _getReadableErrorMessage(e.code));
-        debugPrint(e.code);
-      }
-      debugPrint(e.code);
+      VFullScreenLoader.stopLoading();
+      VLoaders.errorSnackBar(
+          title: e.code.toString(),
+          message: _getReadableErrorMessage(e.code.toString()));
     }
   }
 
@@ -175,13 +172,14 @@ class FireAuthServices {
       });
 
       if (context.mounted) {
-        Navigator.pop(context);
+        VFullScreenLoader.stopLoading();
         VLoaders.successSnackBar(
           title: 'Verification Email Sent',
           message:
               'Please check your email to verify your account before logging in.',
         );
-        Get.to(() => const Login());
+        signOut(context);
+        Get.to(() => const Auth());
       }
     } catch (e) {
       if (context.mounted) {

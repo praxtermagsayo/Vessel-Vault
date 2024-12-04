@@ -56,34 +56,33 @@ class RegisterPage extends GetView<RegisterController> {
               ),
               mySize(10, 0, null),
               Obx(
-                      () => myText(
-                          context: context,
-                          label: 'Password',
-                          hint: 'Enter your password',
-                          controller: controller.passwordController,
-                          inputType: TextInputType.visiblePassword,
-                          obscure: controller.obscure.value,
-                          onChanged: controller.checkPasswordStrength,
-                          onTap: () {
-                            controller.obscure.value =
-                                !controller.obscure.value;
-                          },
-                          suffix: Icon(controller.obscure.value
-                              ? Icons.visibility
-                              : Icons.visibility_off),
-                          action: TextInputAction.done,
-                          validator: controller.validatePassword),
-                    ),
+                () => myText(
+                    context: context,
+                    label: 'Password',
+                    hint: 'Enter your password',
+                    controller: controller.passwordController,
+                    inputType: TextInputType.visiblePassword,
+                    obscure: controller.obscure.value,
+                    onChanged: controller.checkPasswordStrength,
+                    onTap: () {
+                      controller.obscure.value = !controller.obscure.value;
+                    },
+                    suffix: Icon(controller.obscure.value
+                        ? Icons.visibility
+                        : Icons.visibility_off),
+                    action: TextInputAction.done,
+                    validator: controller.validatePassword),
+              ),
               mySize(10, 0, null),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Obx(() => Text(
-                  'Password Strength: ${controller.passwordStrength}',
-                  style: TextStyle(
-                    color: controller.passwordColor.value,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )),
+                      'Password Strength: ${controller.passwordStrength}',
+                      style: TextStyle(
+                        color: controller.passwordColor.value,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )),
               ),
               mySize(10, 0, null),
               Row(
@@ -93,20 +92,31 @@ class RegisterPage extends GetView<RegisterController> {
                         onChanged: controller.toggleTerms,
                       )),
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => TermsAndConditions.showTermsDialog(),
-                      child: Text(
-                        'I accept the terms and conditions',
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          decoration: TextDecoration.underline,
+                    child: Row(
+                      children: [
+                        Text('I accept the', style: Theme.of(context).textTheme.bodyLarge),
+                        mySize(0, 5, null),
+                        GestureDetector(
+                          onTap: () => TermsAndConditions.showTermsDialog(),
+                          child: Text(
+                            'terms and conditions',
+                            style:
+                                Theme.of(context).textTheme.bodyLarge!.copyWith(
+                                      decoration: TextDecoration.underline,
+                                    ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ],
               ),
               mySize(20, 0, null),
-              myButton(context: context, isPrimary: true, onTap: controller.register, label: 'Register'),
+              myButton(
+                  context: context,
+                  isPrimary: true,
+                  onTap: controller.register,
+                  label: 'Register'),
             ],
           ),
         ),

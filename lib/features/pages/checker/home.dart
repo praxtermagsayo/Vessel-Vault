@@ -31,14 +31,6 @@ class _HomeState extends State<Home> {
             },
           ),
           myDoubleNav(context),
-          myButton(
-            context: context,
-            isPrimary: true,
-            onTap: () {
-              FireAuthServices.signOut(context);
-            },
-            label: 'temp',
-          ),
           mySection(
             context,
             'Recent Documents',
