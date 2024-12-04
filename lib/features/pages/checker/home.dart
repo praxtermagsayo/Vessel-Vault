@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vessel_vault/controller/data_controllers/fetch_data_controller.dart';
-import '../../../utilities/functions/fireauth_services.dart';
 import '../../../utilities/functions/reusable.dart';
 
 class Home extends StatefulWidget {
