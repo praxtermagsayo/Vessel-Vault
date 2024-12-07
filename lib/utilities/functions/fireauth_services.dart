@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_ip_address/get_ip_address.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vessel_vault/features/authentication/auth.dart';
 import 'package:vessel_vault/features/authentication/login.dart';
@@ -20,12 +21,53 @@ class FireAuthServices {
       VLoaders.successSnackBar(
           title: 'Login Successful',
           message: 'Welcome to Vessel Vault! ${email.trim()}');
+      updateUserPresence(true);
+      updateIpAddress();
     } on FirebaseAuthException catch (e) {
       VFullScreenLoader.stopLoading();
       VLoaders.errorSnackBar(
           title: e.code.toString(),
           message: _getReadableErrorMessage(e.code.toString()));
     }
+  }
+
+  static getIpAddress() async {
+    try {
+      var ipAddress = IpAddress(type: RequestType.json);
+
+      dynamic data = await ipAddress.getIpAddress();
+      return data;
+    } on IpAddressException catch (e) {
+      debugPrint('Get IP ERROR: ${e.message}');
+    }
+  }
+
+  static Future<void> updateIpAddress() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      var ipAddress = IpAddress(type: RequestType.json);
+      dynamic data = await ipAddress.getIpAddress();
+      debugPrint('IP ADDRESS: $data');
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({
+        'ipAddress': data,
+      });
+    } on IpAddressException catch (e) {
+      debugPrint('Update IP ERROR: ${e.message}');
+    }
+  }
+
+  static Future<void> updateUserPresence(bool status) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+      'lastSeen': FieldValue.serverTimestamp(),
+      'isOnline': status,
+    });
   }
 
   static String _getReadableErrorMessage(String errorCode) {
@@ -91,6 +133,8 @@ class FireAuthServices {
   static Future<void> signOut(BuildContext context) async {
     VLoaders.showLoading(context);
     try {
+      updateUserPresence(false);
+      updateIpAddress();
       await FirebaseAuth.instance.signOut();
       if (context.mounted) {
         Navigator.pop(context);
@@ -157,6 +201,7 @@ class FireAuthServices {
 
       // Send verification email
       await userCredential.user!.sendEmailVerification();
+      dynamic ipAdd = await getIpAddress();
 
       // Store user data in Firestore
       await FirebaseFirestore.instance
@@ -169,6 +214,9 @@ class FireAuthServices {
         'middleName': middleName,
         'createdAt': FieldValue.serverTimestamp(),
         'isVerified': false,
+        'isOnline': false,
+        'ipAddress': ipAdd,
+        'role': 'checker',
       });
 
       if (context.mounted) {
