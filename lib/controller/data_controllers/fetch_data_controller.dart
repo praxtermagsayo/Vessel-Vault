@@ -6,6 +6,9 @@ import 'package:vessel_vault/utilities/loaders/circular_loader.dart';
 import '../../features/pages/checker/subpages/func/document_card.dart';
 import '../../utilities/functions/reusable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+
+import '../../utilities/popups/loaders.dart';
 
 class FetchDataController extends GetxController {
   // Firebase instances
@@ -51,6 +54,26 @@ class FetchDataController extends GetxController {
   Stream<QuerySnapshot> fetchAllExpenses() {
     return _firestore
         .collection('expenses')
+        .orderBy('date_time', descending: true)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> fetchRecentReports() {
+    final currentUser = _auth.currentUser;
+    return _firestore
+        .collection('reports')
+        .where('uid', isEqualTo: currentUser?.uid)
+        .orderBy('date_time', descending: true)
+        .where('date_time', 
+            isGreaterThanOrEqualTo: VTimeStamps.getDateFrom(1))
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> fetchAllReports() {
+    final currentUser = _auth.currentUser;
+    return _firestore
+        .collection('reports')
+        .where('uid', isEqualTo: currentUser?.uid)
         .orderBy('date_time', descending: true)
         .snapshots();
   }
@@ -230,5 +253,84 @@ class FetchDataController extends GetxController {
   void filterDocuments(String query) {
     searchQuery.value = query;
     update(); // This triggers a rebuild of GetBuilder widgets
+  }
+
+  Widget buildReportsList(
+    BuildContext context,
+    Stream<QuerySnapshot> stream,
+  ) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const VCircularLoader();
+        }
+
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No reports generated yet.'));
+        }
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: snapshot.data!.docs.length,
+          itemBuilder: (context, index) {
+            final report = snapshot.data!.docs[index];
+            final createdAt = (report['createdAt'] as Timestamp).toDate();
+            
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              child: ListTile(
+                title: Text('Report - ${report['area']}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Fish Type: ${report['fishType']}'),
+                    Text('Generated: ${DateFormat('MMM dd, yyyy hh:mm a').format(createdAt)}'),
+                  ],
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove_red_eye),
+                      onPressed: () => _viewReport(context, report),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => _deleteReport(context, report.id),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteReport(BuildContext context, String reportId) async {
+    try {
+      await _firestore.collection('reports').doc(reportId).delete();
+      VLoaders.successSnackBar(
+        title: 'Success',
+        message: 'Report deleted successfully',
+      );
+    } catch (e) {
+      VLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to delete report: $e',
+      );
+    }
+  }
+
+  Future<void> _viewReport(BuildContext context, QueryDocumentSnapshot report) async {
+    // Implement report viewing logic here
+    // This could open a detailed view or regenerate the PDF
   }
 }

@@ -35,7 +35,7 @@ class VAnimationLoaderWidget extends StatelessWidget {
         children: [
           Lottie.asset(animation,
               width: MediaQuery.of(context).size.width *
-                  0.8), // Display Lottie animation
+                  0.6),
           mySize(10, 0, null),
           Text(
             text,

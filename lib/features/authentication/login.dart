@@ -15,6 +15,7 @@ class Login extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(LoginController());
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -22,8 +23,8 @@ class Login extends StatelessWidget {
         child: Center(
           child: SingleChildScrollView(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 400,
+              constraints: BoxConstraints(
+                maxWidth: screenSize.width * 0.8,
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -91,21 +92,34 @@ class Login extends StatelessWidget {
                         ),
                       ],
                     ),
-                    myButton(context: context, isPrimary: true, onTap: () async {
-                      await FireAuthServices.signIn(context,
-                          controller.email.text, controller.password.text);
-                      controller.clearInputs();
-                    }, label: 'Login'),
+                    myButton(
+                        context: context,
+                        isPrimary: true,
+                        onTap: () async {
+                          await FireAuthServices.signIn(context,
+                              controller.email.text, controller.password.text);
+                          controller.clearInputs();
+                        },
+                        label: 'Login'),
                     mySize(10, 0, null),
-                    myButton(context: context, isPrimary: false, onTap: () {
-                      Get.to(() => const ForgotPassword());
-                    }, label: 'Forgot Password'),
+                    myButton(
+                        context: context,
+                        isPrimary: false,
+                        onTap: () {
+                          Get.to(() => const ForgotPassword());
+                        },
+                        label: 'Forgot Password'),
                     mySize(40, 0, null),
                     const Text('OR'),
                     mySize(40, 0, null),
-                    myButton(context: context, isPrimary: false, onTap: () async {
-                      await FireAuthServices.signInWithGoogle(context);
-                    }, label: 'Login with Gmail', image: 'assets/icon/google_logo.png'),
+                    myButton(
+                        context: context,
+                        isPrimary: false,
+                        onTap: () async {
+                          await FireAuthServices.signInWithGoogle(context);
+                        },
+                        label: 'Login with Gmail',
+                        image: 'assets/icon/google_logo.png'),
                   ],
                 ),
               ),

@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:vessel_vault/utilities/functions/reusable.dart';
 import 'package:vessel_vault/utilities/loaders/full_screen_loader.dart';
 import '../../features/models/document_model.dart';
+import 'package:vessel_vault/features/models/report_model.dart';
+import 'package:vessel_vault/utilities/popups/loaders.dart';
 
 class StoreDataController extends GetxController {
   // Firebase instances
@@ -243,6 +245,53 @@ class StoreDataController extends GetxController {
         ],
       ),
     );
+  }
+
+  Future<void> storeReport() async {
+    try {
+      // Show loading indicator
+      VFullScreenLoader.openLoadingDialog(
+          'Generating Report', 'assets/images/animations/loading.json');
+
+      // Update lists from temporary data
+      updateCustomersList();
+      updateExpensesList();
+
+      // Create report model
+      final report = ReportModel(
+        uid: user.uid,
+        area: areaController.text,
+        fishType: fishTypeController.text,
+        customers: customersLists,
+        expenses: expensesLists,
+      );
+
+      // Store in Firestore
+      await FirebaseFirestore.instance
+          .collection('reports')
+          .add(report.toJson());
+
+      // Clear inputs after successful storage
+      clearInputs();
+
+      // Show success message
+      VLoaders.successSnackBar(
+        title: 'Success',
+        message: 'Report generated and stored successfully!',
+      );
+
+      // Navigate back
+      Get.back();
+    } catch (e) {
+      // Show error message
+      VLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to store report: ${e.toString()}',
+      );
+    } finally {
+      // Hide loading indicator
+      VFullScreenLoader.stopLoading();
+    }
   }
 
   @override

@@ -263,7 +263,7 @@ Widget myDoubleNav(BuildContext context) {
             Get.to(() => const CreateDocument());
           }, 'New Document', VIcons.documentIcon),
           myNavigationButton(context, () {
-            Get.to(() => const Reports());
+            Get.to(() => const GenReports());
           }, 'Generate Report', VIcons.report),
         ],
       ),
