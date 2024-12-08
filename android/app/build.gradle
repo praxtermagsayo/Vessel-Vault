@@ -38,7 +38,16 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.debug
+        }
+    }
+    
+    android.applicationVariants.all { variant ->
+        def appName = "vessel_vault_app"
+        variant.outputs.all { output ->
+            def buildType = variant.buildType.name
+            def version = variant.versionName
+            outputFileName = "${appName}_${buildType}_${version}.apk"
         }
     }
 }
