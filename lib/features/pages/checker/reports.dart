@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:vessel_vault/controller/data_controllers/fetch_data_controller.dart';
 import 'package:vessel_vault/utilities/functions/reusable.dart';
 import 'package:vessel_vault/utilities/loaders/circular_loader.dart';
@@ -16,7 +18,7 @@ class Reports extends StatelessWidget {
     final dataController = Get.put(FetchDataController());
 
     return Scaffold(
-      appBar: myAppBar(context: context, title: 'Reports'),
+      appBar: myAppBar(context: context, title: 'Reports', action: true),
       body: myBody(
         context: context,
         children: [
@@ -24,10 +26,10 @@ class Reports extends StatelessWidget {
             context,
             'Recent Reports',
             [
-              dataController.buildDataList(
+              dataController.buildFilteredList(
                 context,
                 dataController.fetchRecentReports(),
-                useSection: true,
+                useSection: false,
                 onTapItem: (report) => _viewReport(context, report),
               ),
             ],
@@ -48,19 +50,32 @@ class Reports extends StatelessWidget {
                     return const Center(
                         child: Text('No reports generated yet'));
                   }
-
                   return ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: (context, index) {
                       final report = snapshot.data!.docs[index];
-                      return ListTile(
-                        title: Text('Report - ${report['area']}'),
-                        subtitle: Text('Fish Type: ${report['fishType']}'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.remove_red_eye),
-                          onPressed: () => _viewReport(context, report),
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: ListTile(
+                          onTap: () => _viewReport(context, report),
+                          leading: const Icon(Icons.description),
+                          title: Text(
+                            '${report['area']}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Fish Type: ${report['fishType']}'),
+                              Text(
+                                  'Date: ${DateFormat('dd/MM/yyyy').format(report['date_time'].toDate())}'),
+                            ],
+                          ),
+                          trailing: const Icon(Icons.check_circle, size: 24),
                         ),
                       );
                     },
@@ -81,23 +96,22 @@ class Reports extends StatelessWidget {
     );
   }
 
-  Future<void> _viewReport(BuildContext context, QueryDocumentSnapshot report) async {
-  try {
-    VFullScreenLoader.openLoadingDialog(
-      'Opening Report',
-      'assets/images/animations/loading.json',
-    );
-    
-    // Use the existing ReportGenerator to view the report
-    await ReportGenerator.generateAndOpenReport(report);
-    
-  } catch (e) {
-    VLoaders.errorSnackBar(
-      title: 'Error',
-      message: 'Failed to open report: ${e.toString()}',
-    );
-  } finally {
-    VFullScreenLoader.stopLoading();
+  Future<void> _viewReport(
+      BuildContext context, QueryDocumentSnapshot report) async {
+    try {
+      VFullScreenLoader.openLoadingDialog(
+        'Opening Report',
+        'assets/images/animations/loading.json',
+      );
+
+      await OpenFile.open(report['filePath']);
+    } catch (e) {
+      VLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to open report: ${e.toString()}',
+      );
+    } finally {
+      VFullScreenLoader.stopLoading();
+    }
   }
-}
 }

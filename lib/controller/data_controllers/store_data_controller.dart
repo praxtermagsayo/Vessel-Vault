@@ -23,6 +23,7 @@ class StoreDataController extends GetxController {
   final TextEditingController customerKiloController = TextEditingController();
   final TextEditingController expenseCategoryController = TextEditingController();
   final TextEditingController expenseAmountController = TextEditingController();
+  final String filePath = '';
 
   // Observable variables
   final RxMap<int, Map<String, dynamic>> tempCustomers =
@@ -249,21 +250,19 @@ class StoreDataController extends GetxController {
 
   Future<void> storeReport() async {
     try {
-      // Show loading indicator
       VFullScreenLoader.openLoadingDialog(
           'Generating Report', 'assets/images/animations/loading.json');
 
-      // Update lists from temporary data
       updateCustomersList();
       updateExpensesList();
 
-      // Create report model
       final report = ReportModel(
         uid: user.uid,
         area: areaController.text,
         fishType: fishTypeController.text,
         customers: customersLists,
         expenses: expensesLists,
+        filePath: filePath,
       );
 
       // Store in Firestore

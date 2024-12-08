@@ -21,12 +21,21 @@ class GenReports extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dataController = Get.put(FetchDataController());
+    final searchController = TextEditingController();
 
     return Scaffold(
-      appBar: myAppBar(context: context, title: 'Generate Report', action: true),
+      appBar: myAppBar(context: context, title: 'Generate Reports'),
       body: myBody(
         context: context,
         children: [
+          mySearchBar(
+            context,
+            searchController,
+            'Search...',
+            onChanged: (value) {
+              dataController.filterDocuments(value);
+            },
+          ),
           mySection(
             context,
             'Recent Documents',
@@ -34,8 +43,9 @@ class GenReports extends StatelessWidget {
               dataController.buildDataList(
                 context,
                 dataController.fetchRecentDocuments(),
-                useSection: true,
-                onTapItem: (document) => ReportGenerator.generateAndOpenReport(document),
+                useSection: false,
+                onTapItem: (document) =>
+                    ReportGenerator.generateAndOpenReport(document),
               ),
             ],
           ),
@@ -44,11 +54,12 @@ class GenReports extends StatelessWidget {
             context,
             'All Documents',
             [
-              dataController.buildDataList(
+              dataController.buildFilteredList(
                 context,
                 dataController.fetchAllDocuments(),
-                useSection: true,
-                onTapItem: (document) => ReportGenerator.generateAndOpenReport(document),
+                useSection: false,
+                onTapItem: (document) =>
+                    ReportGenerator.generateAndOpenReport(document),
               ),
             ],
           ),
@@ -59,14 +70,16 @@ class GenReports extends StatelessWidget {
 }
 
 class ReportGenerator {
-  static Future<void> generateAndOpenReport(QueryDocumentSnapshot document) async {
+  static Future<void> generateAndOpenReport(
+      QueryDocumentSnapshot document) async {
     try {
       VFullScreenLoader.openLoadingDialog(
         'Generating report...',
         'assets/images/animations/loading.json',
       );
 
-      final fontData = await rootBundle.load("assets/fonts/Poppins-Regular.ttf");
+      final fontData =
+          await rootBundle.load("assets/fonts/Poppins-Regular.ttf");
       final ttf = pw.Font.ttf(fontData);
       final pdf = pw.Document();
 
@@ -93,27 +106,25 @@ class ReportGenerator {
         ),
       );
 
-      // Generate and save PDF
       final output = await getTemporaryDirectory();
       final date = DateFormat('yyyy-MM-dd-HH-mm').format(DateTime.now());
       final filePath = '${output.path}/Report_$date.pdf';
       final file = File(filePath);
       await file.writeAsBytes(await pdf.save());
 
-      // Create and store report model
       final report = ReportModel(
         uid: FirebaseAuth.instance.currentUser!.uid,
         area: document['area'],
         fishType: document['fishType'],
         customers: List<Map<String, dynamic>>.from(document['customers'] ?? []),
         expenses: List<Map<String, dynamic>>.from(document['expenses'] ?? []),
+        filePath: filePath,
       );
 
       await FirebaseFirestore.instance
           .collection('reports')
           .add(report.toJson());
 
-      // Open the generated PDF
       await OpenFile.open(filePath);
 
       VLoaders.successSnackBar(
@@ -171,8 +182,9 @@ class ReportGenerator {
   }
 
   static pw.Widget _buildCustomersTable(QueryDocumentSnapshot document) {
-    final customers = List<Map<String, dynamic>>.from(document['customers'] ?? []);
-    
+    final customers =
+        List<Map<String, dynamic>>.from(document['customers'] ?? []);
+
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -228,8 +240,9 @@ class ReportGenerator {
   }
 
   static pw.Widget _buildExpensesTable(QueryDocumentSnapshot document) {
-    final expenses = List<Map<String, dynamic>>.from(document['expenses'] ?? []);
-    
+    final expenses =
+        List<Map<String, dynamic>>.from(document['expenses'] ?? []);
+
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [

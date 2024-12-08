@@ -7,6 +7,7 @@ class ReportModel {
   final List<Map<String, dynamic>> customers;
   final List<Map<String, dynamic>> expenses;
   final DateTime dateTime;
+  final String filePath;
 
   ReportModel({
     required this.uid,
@@ -14,6 +15,7 @@ class ReportModel {
     required this.fishType,
     required this.customers,
     required this.expenses,
+    required this.filePath,
     DateTime? dateTime,
   }) : dateTime = dateTime ?? DateTime.now();
 
@@ -26,6 +28,7 @@ class ReportModel {
       'customers': customers,
       'expenses': expenses,
       'date_time': dateTime,
+      'filePath': filePath,
     };
   }
 
@@ -38,6 +41,7 @@ class ReportModel {
       customers: List<Map<String, dynamic>>.from(json['customers']),
       expenses: List<Map<String, dynamic>>.from(json['expenses']),
       dateTime: (json['date_time'] as Timestamp).toDate(),
+      filePath: json['filePath'],
     );
   }
 } 

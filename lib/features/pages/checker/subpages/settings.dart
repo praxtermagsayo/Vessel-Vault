@@ -100,9 +100,18 @@ class SettingsPage extends StatelessWidget {
                       );
                     }
                     if (snapshot.hasData) {
+                      String displayName = '';
+
+                      if (user.displayName == null ||
+                          user.displayName == '') {
+                        displayName =
+                            '${snapshot.data?.docs[0]['firstName']} ${snapshot.data?.docs[0]['lastName']}';
+                      } else {
+                        displayName = user.displayName!;
+                      }
                       return myProfile(
                         context,
-                        '${user.displayName ?? snapshot.data?.docs[0]['firstName'] + ' ' + snapshot.data?.docs[0]['lastName']}',
+                        displayName,
                         '${user.email}',
                         getProfileImage(user.uid, VImages.userProfile),
                         150,

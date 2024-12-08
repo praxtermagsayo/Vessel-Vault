@@ -29,7 +29,8 @@ class Documents extends StatelessWidget {
               dataController.filterDocuments(value);
             },
           ),
-          mySection(context, 'All Documents', [
+          mySection(
+            context, 'All Documents', [
             dataController.buildFilteredList(
               context,
               dataController.fetchAllDocuments(),
