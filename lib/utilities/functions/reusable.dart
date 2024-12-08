@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vessel_vault/features/pages/checker/reports.dart';
+import 'package:vessel_vault/features/pages/checker/subpages/func/generate_reports.dart';
 import 'package:vessel_vault/features/pages/checker/subpages/settings.dart';
 import 'package:vessel_vault/utilities/constants/colors.dart';
 import 'package:vessel_vault/utilities/constants/font_size.dart';
