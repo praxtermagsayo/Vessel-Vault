@@ -60,7 +60,7 @@ class FireAuthServices {
     }
   }
 
-  static Future<void> updateUserPresence(bool status) async {
+  static Future<void>   updateUserPresence(bool status) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 

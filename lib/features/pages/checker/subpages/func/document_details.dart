@@ -69,64 +69,6 @@ class _DocumentDetailsState extends State<DocumentDetails> {
     }
   }
 
-  Future<void> _editCustomer(int index) async {
-    final customer = customers[index];
-    final nameController = TextEditingController(text: customer['name']);
-    final kiloController = TextEditingController(text: customer['kilo']);
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Customer'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            myText(
-              label: 'Name',
-              context: context,
-              controller: nameController,
-              inputType: TextInputType.name,
-              action: TextInputAction.next,
-            ),
-            mySize(10, 0, null),
-            myText(
-              label: 'Kilo',
-              context: context,
-              controller: kiloController,
-              inputType: TextInputType.number,
-              action: TextInputAction.done,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          myButton(
-            context: context  ,
-            isPrimary: false,
-            onTap: () {
-              if (nameController.text.isNotEmpty &&
-                  kiloController.text.isNotEmpty) {
-                setState(() {
-                  customers[index] = {
-                    'name': nameController.text,
-                    'kilo': kiloController.text,
-                  };
-                });
-                Navigator.pop(context);
-              }
-            },
-            label: 'Save',
-          ),
-        ],
-      ),
-    );
-
-    nameController.dispose();
-    kiloController.dispose();
-  }
 
   Future<void> _addNewCustomer() async {
     final nameController = TextEditingController();
@@ -188,65 +130,6 @@ class _DocumentDetailsState extends State<DocumentDetails> {
     });
   }
 
-  Future<void> _editExpense(int index) async {
-    final expense = expenses[index];
-    final categoryController = TextEditingController(text: expense['category']);
-    final amountController = TextEditingController(text: expense['amount']);
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Expense'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            myText(
-              label: 'Category',
-              context: context,
-              controller: categoryController,
-              inputType: TextInputType.text,
-              action: TextInputAction.next,
-            ),
-            mySize(10, 0, null),
-            myText(
-              label: 'Amount',
-              context: context,
-              controller: amountController,
-              inputType: TextInputType.number,
-              action: TextInputAction.done,
-              prefix: '₱',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          myButton(
-            context: context,
-            isPrimary: false,
-            onTap: () {
-              if (categoryController.text.isNotEmpty &&
-                  amountController.text.isNotEmpty) {
-                setState(() {
-                  expenses[index] = {
-                    'category': categoryController.text,
-                    'amount': amountController.text,
-                  };
-                });
-                Navigator.pop(context);
-              }
-            },
-            label: 'Save',
-          ),
-        ],
-      ),
-    );
-
-    categoryController.dispose();
-    amountController.dispose();
-  }
 
   Future<void> _addNewExpense() async {
     final categoryController = TextEditingController();

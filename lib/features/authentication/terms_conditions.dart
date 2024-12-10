@@ -25,7 +25,7 @@ class TermsAndConditions {
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         '1. Acceptance of Terms',
                         style: TextStyle(fontWeight: FontWeight.bold),
